@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>90-Day Mastery</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background-color: #0f172a;
+            background-image: radial-gradient(circle at top right, #1e1b4b, #0f172a);
+            color: #e2e8f0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            touch-action: manipulation;
+        }
+        
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .checkbox-custom {
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border: 2px solid #475569;
+            border-radius: 6px;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            position: relative;
+            background: #1e293b;
+        }
+
+        .checkbox-custom:checked {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            transform: scale(1.1);
+        }
+
+        .checkbox-custom:checked::after {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            color: white;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 14px;
+        }
+        
+        .progress-bar-bg {
+            background-color: #334155;
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+        
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            transition: width 0.5s ease-out;
+        }
+
+        /* Rank Colors */
+        .rank-bronze { color: #cd7f32; text-shadow: 0 0 10px rgba(205, 127, 50, 0.5); }
+        .rank-silver { color: #c0c0c0; text-shadow: 0 0 10px rgba(192, 192, 192, 0.5); }
+        .rank-gold { color: #ffd700; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
+        .rank-platinum { color: #e5e4e2; text-shadow: 0 0 10px rgba(229, 228, 226, 0.5); }
+        .rank-diamond { color: #b9f2ff; text-shadow: 0 0 15px rgba(185, 242, 255, 0.8); }
+        .rank-master { color: #ff00ff; text-shadow: 0 0 15px rgba(255, 0, 255, 0.8); }
+        .rank-grandmaster { color: #ff4500; text-shadow: 0 0 15px rgba(255, 69, 0, 0.8); }
+        .rank-legend { color: #ffdf00; text-shadow: 0 0 20px rgba(255, 223, 0, 1); }
+
+        .skin-card {
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .skin-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+        }
+        .skin-card.locked {
+            opacity: 0.5;
+            filter: grayscale(100%);
+            cursor: not-allowed;
+        }
+        .skin-card.equipped {
+            border: 2px solid #3b82f6;
+            background: rgba(59, 130, 246, 0.2);
+        }
+
+        .modal-overlay {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        .pop-animation {
+            animation: pop 0.3s ease-out forwards;
+        }
+
+        .strategy-btn {
+            transition: transform 0.2s, filter 0.2s;
+        }
+        .strategy-btn:hover {
+            transform: scale(1.2);
+            filter: brightness(1.5);
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+
+<body class="p-4 md:p-8 min-h-screen pb-24">
+
+    <!-- Header & Stats -->
+    <div class="max-w-6xl mx-auto mb-8">
+        <div class="glass-panel rounded-2xl p-6 flex flex-col gap-4">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">90-Day Mastery</h1>
+                    <p class="text-slate-400 text-sm mt-1">Consistency is the key to legend.</p>
+                </div>
+                
+                <div class="flex gap-4 items-center">
+                    <div class="text-center bg-slate-800 rounded-lg px-4 py-2 border border-slate-700 shadow-inner">
+                        <div class="text-[10px] text-slate-400 uppercase tracking-wider">Flawless Streak</div>
+                        <div class="text-xl font-bold text-orange-400">🔥 <span id="flawless-streak">0</span></div>
+                    </div>
+                    
+                    <button onclick="openAIModal()" class="glass-panel hover:bg-slate-700 transition rounded-lg px-4 py-2 flex flex-col items-center justify-center border border-purple-500/50 shadow-[0_0_10px_rgba(168,85,247,0.2)]">
+                        <div class="text-[10px] text-purple-400 uppercase tracking-wider font-bold">AI Mentor</div>
+                        <div class="text-lg">✨</div>
+                    </button>
+                    
+                    <button onclick="openRewardsModal()" class="glass-panel hover:bg-slate-700 transition rounded-full px-6 py-2 flex items-center gap-3 border border-blue-500/30 shadow-lg">
+                        <div id="player-avatar" class="text-2xl">👤</div>
+                        <div class="text-left">
+                            <div id="player-rank" class="text-sm font-bold uppercase tracking-widest rank-bronze">Bronze</div>
+                            <div class="text-xs text-slate-400">Lv. <span id="player-level">1</span></div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Overall Journey Progress Bar -->
+            <div class="w-full mt-2 px-2">
+                <div class="flex justify-between text-[10px] text-slate-400 mb-1 font-bold uppercase tracking-wider">
+                    <span>Journey Progress</span>
+                    <span id="journey-text">Day 1 / 90</span>
+                </div>
+                <div class="h-2.5 w-full bg-slate-800/80 rounded-full overflow-hidden border border-slate-700/50 shadow-inner">
+                    <div id="journey-bar" class="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-yellow-500 transition-all duration-500 w-0 shadow-[0_0_10px_rgba(168,85,247,0.5)]"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        
+        <!-- Prayers Section -->
+        <div class="glass-panel rounded-2xl p-6 border-t-4 border-t-blue-500/50">
+            <h2 class="text-xl font-bold mb-4 flex items-center gap-2 text-blue-400">
+                <i class="fas fa-moon"></i> Prayers & Spirit
+            </h2>
+            <div class="flex justify-between text-xs text-slate-500 mb-2 px-2">
+                <span>Intel</span>
+                <span>Best Streak</span>
+            </div>
+            <div id="prayers-container" class="space-y-3">
+                <!-- Generated by JS -->
+            </div>
+        </div>
+
+        <!-- Habits Section -->
+        <div class="glass-panel rounded-2xl p-6 border-t-4 border-t-purple-500/50">
+            <h2 class="text-xl font-bold mb-4 flex items-center gap-2 text-purple-400">
+                <i class="fas fa-bolt"></i> Daily Grind
+            </h2>
+            <div class="flex justify-between text-xs text-slate-500 mb-2 px-2">
+                <span>Intel</span>
+                <span>Best Streak</span>
+            </div>
+            <div id="habits-container" class="space-y-3">
+                <!-- Generated by JS -->
+            </div>
+        </div>
+
+        <!-- Traps Section -->
+        <div class="glass-panel rounded-2xl p-6 border-t-4 border-t-red-500/50">
+            <h2 class="text-xl font-bold mb-4 flex items-center gap-2 text-red-400">
+                <i class="fas fa-shield-alt"></i> Traps Dodged
+            </h2>
+            <div class="flex justify-between text-xs text-slate-500 mb-2 px-2">
+                <span>Intel</span>
+                <span>Best Streak</span>
+            </div>
+            <div id="traps-container" class="space-y-3">
+                <!-- Generated by JS -->
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Day Navigation -->
+    <div class="fixed bottom-0 left-0 right-0 p-4 glass-panel border-t border-slate-700/50 flex justify-center items-center gap-6 z-40">
+        <button onclick="changeDay(-1)" class="w-10 h-10 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center transition shadow-lg border border-slate-600">
+            <i class="fas fa-chevron-left text-slate-300"></i>
+        </button>
+        <div class="text-center min-w-[120px]">
+            <div class="text-sm text-slate-400">Current Day</div>
+            <div class="text-xl font-bold text-white" id="current-day-display">Day 1</div>
+        </div>
+        <button onclick="changeDay(1)" class="w-10 h-10 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center transition shadow-lg border border-slate-600">
+            <i class="fas fa-chevron-right text-slate-300"></i>
+        </button>
+    </div>
+
+    <!-- Strategy / Intel Modal -->
+    <div id="strategy-modal" class="fixed inset-0 modal-overlay z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-panel bg-slate-900/95 rounded-2xl w-full max-w-md overflow-hidden border border-yellow-500/50 shadow-[0_0_25px_rgba(234,179,8,0.2)]">
+            <div class="p-4 border-b border-slate-700 flex justify-between items-center bg-yellow-900/20">
+                <h2 class="text-xl font-bold text-yellow-400 flex items-center gap-2"><i class="fas fa-book-open"></i> Quest Intel</h2>
+                <button onclick="closeStrategyModal()" class="text-slate-400 hover:text-white transition">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <h3 id="strat-title" class="text-2xl font-bold text-white mb-6 text-center border-b border-slate-700 pb-4">Task Name</h3>
+                
+                <div class="space-y-6">
+                    <!-- Negative Trigger -->
+                    <div class="bg-red-900/20 border border-red-500/30 rounded-xl p-4">
+                        <div class="text-red-400 font-bold text-sm uppercase tracking-wider mb-2 flex items-center gap-2">
+                            <i class="fas fa-skull-crossbones"></i> The Trap (Friction)
+                        </div>
+                        <p id="strat-negative" class="text-slate-300 text-sm leading-relaxed"></p>
+                    </div>
+
+                    <!-- Positive Trigger -->
+                    <div class="bg-green-900/20 border border-green-500/30 rounded-xl p-4">
+                        <div class="text-green-400 font-bold text-sm uppercase tracking-wider mb-2 flex items-center gap-2">
+                            <i class="fas fa-crosshairs"></i> The Cue (Trigger)
+                        </div>
+                        <p id="strat-positive" class="text-slate-300 text-sm leading-relaxed"></p>
+                    </div>
+
+                    <!-- Cheat Code -->
+                    <div class="bg-blue-900/20 border border-blue-500/30 rounded-xl p-4">
+                        <div class="text-blue-400 font-bold text-sm uppercase tracking-wider mb-2 flex items-center gap-2">
+                            <i class="fas fa-bolt"></i> Cheat Code (Hack)
+                        </div>
+                        <p id="strat-hack" class="text-slate-300 text-sm leading-relaxed"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 bg-slate-800/80 text-center">
+                <button onclick="closeStrategyModal()" class="px-8 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg font-bold transition text-white">Got It</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rewards Modal -->
+    <div id="rewards-modal" class="fixed inset-0 modal-overlay z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-panel rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto border border-slate-600">
+            <div class="sticky top-0 glass-panel p-4 flex justify-between items-center border-b border-slate-700 z-10">
+                <h2 class="text-2xl font-bold text-white">Player Profile</h2>
+                <button onclick="closeRewardsModal()" class="text-slate-400 hover:text-white">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="p-6">
+                <!-- Profile Header -->
+                <div class="flex flex-col md:flex-row items-center gap-6 mb-8 p-6 bg-slate-800/50 rounded-xl">
+                    <div id="modal-avatar" class="text-7xl">👤</div>
+                    <div class="flex-1 text-center md:text-left">
+                        <h3 id="modal-rank" class="text-3xl font-bold uppercase tracking-widest rank-bronze mb-1">Bronze</h3>
+                        <p class="text-slate-400 text-sm mb-4">Total Experience: <span id="modal-xp" class="text-purple-400 font-bold">0 XP</span></p>
+                        
+                        <div class="w-full progress-bar-bg h-4 mb-1">
+                            <div id="xp-bar" class="progress-bar-fill w-0"></div>
+                        </div>
+                        <div class="flex justify-between text-xs text-slate-400">
+                            <span>Level <span id="modal-level">1</span></span>
+                            <span id="xp-text">0 / 100 XP</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Overview -->
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+                    <div class="bg-slate-800 p-4 rounded-xl text-center border border-slate-700">
+                        <div class="text-2xl font-bold text-blue-400" id="stat-tasks">0</div>
+                        <div class="text-xs text-slate-400 uppercase mt-1">Tasks Done</div>
+                    </div>
+                    <div class="bg-slate-800 p-4 rounded-xl text-center border border-slate-700">
+                        <div class="text-2xl font-bold text-red-400" id="stat-traps">0</div>
+                        <div class="text-xs text-slate-400 uppercase mt-1">Traps Dodged</div>
+                    </div>
+                    <div class="bg-slate-800 p-4 rounded-xl text-center border border-slate-700">
+                        <div class="text-2xl font-bold text-purple-400" id="stat-perfect">0</div>
+                        <div class="text-xs text-slate-400 uppercase mt-1">Perfect Days</div>
+                    </div>
+                    <div class="bg-slate-800 p-4 rounded-xl text-center border border-slate-700">
+                        <div class="text-2xl font-bold text-orange-400" id="stat-flawless">0</div>
+                        <div class="text-xs text-slate-400 uppercase mt-1">Best Flawless</div>
+                    </div>
+                    <div class="bg-slate-800 p-4 rounded-xl text-center border border-slate-700">
+                        <div class="text-2xl font-bold text-slate-500" id="stat-missed">0</div>
+                        <div class="text-xs text-slate-400 uppercase mt-1">Tasks Missed</div>
+                    </div>
+                </div>
+
+                <!-- Avatar Skins Gallery -->
+                <h3 class="text-xl font-bold mb-4 border-b border-slate-700 pb-2">Avatar Skins</h3>
+                <div id="skins-container" class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+                    <!-- Generated by JS -->
+                </div>
+
+                <!-- Achievements -->
+                <h3 class="text-xl font-bold mb-4 border-b border-slate-700 pb-2">Achievements (<span id="achievement-count">0</span>/100)</h3>
+                <div id="badges-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Generated by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed top-4 right-4 transform translate-x-full transition-transform duration-300 z-50 glass-panel px-6 py-4 rounded-xl border-l-4 border-green-500 hidden items-center gap-3 shadow-[0_0_20px_rgba(34,197,94,0.3)]">
+        <i class="fas fa-trophy text-yellow-400 text-2xl"></i>
+        <div>
+            <div class="font-bold text-white text-sm" id="toast-title">Achievement Unlocked!</div>
+            <div class="text-xs text-slate-300" id="toast-desc">Check rewards dashboard</div>
+        </div>
+    </div>
+
+    <!-- AI Coach Modal -->
+    <div id="ai-modal" class="fixed inset-0 modal-overlay z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-panel bg-slate-900/95 rounded-2xl w-full max-w-lg overflow-hidden border border-purple-500/50 shadow-[0_0_20px_rgba(168,85,247,0.3)]">
+            <div class="p-4 border-b border-slate-700 flex justify-between items-center bg-purple-900/20">
+                <h2 class="text-xl font-bold text-purple-400 flex items-center gap-2"><i class="fas fa-robot"></i> AI Mentor</h2>
+                <button onclick="closeAIModal()" class="text-slate-400 hover:text-white transition">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6 min-h-[180px] flex flex-col items-center justify-center text-center">
+                <div id="ai-loading" class="hidden flex-col items-center gap-4">
+                    <i class="fas fa-circle-notch fa-spin text-4xl text-purple-500"></i>
+                    <p class="text-slate-400 text-sm animate-pulse">Analyzing your life stats...</p>
+                </div>
+                <div id="ai-response-text" class="text-lg text-slate-200 font-medium leading-relaxed italic">
+                    <!-- AI response -->
+                </div>
+            </div>
+            <div class="p-4 border-t border-slate-700 bg-slate-800/50 flex justify-center">
+                <button onclick="fetchAICoach()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 px-6 rounded-lg transition flex items-center gap-2 shadow-lg">
+                    <i class="fas fa-bolt"></i> Consult the Oracle
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA & CONFIG ---
+        const TOTAL_DAYS = 90;
+        
+        // Triggers and Hacks Database linked to tasks
+        const PRAYERS = [
+            { id: 'fajr', name: 'Fajr', strat: {
+                negative: "Sleeping with your phone right next to your bed. You turn off the alarm and instantly fall back asleep.",
+                positive: "Put your phone across the room. You physically have to stand up to turn it off.",
+                hack: "The 'Feet on the Floor' rule. Just tell yourself to put your feet on the floor. Don't think about waking up, just think about standing."
+            }},
+            { id: 'dhuhr', name: 'Dhuhr', strat: {
+                negative: "Getting lost in work, studying, or gaming during the middle of the day until the time passes.",
+                positive: "Set a dedicated Adhan alarm that overrides your \"Do Not Disturb\" mode.",
+                hack: "Habit Stacking: Pray Dhuhr immediately before or after you eat your lunch."
+            }},
+            { id: 'asr', name: 'Asr', strat: {
+                negative: "The mid-afternoon slump. Feeling too lazy or tired after a long day of school/work.",
+                positive: "Keep a prayer mat folded visibly in your room or workspace so it serves as a visual cue.",
+                hack: "Keep your Wudu from Dhuhr if possible. Removing the friction of washing makes praying take exactly 3 minutes."
+            }},
+            { id: 'maghrib', name: 'Maghrib', strat: {
+                negative: "Being out of the house or in transit during sunset and ignoring the short time window.",
+                positive: "Check the sunset time every morning so you know exactly where you will be when it hits.",
+                hack: "Make it the trigger to end your work/study day. 'When Maghrib hits, I close the laptop.'"
+            }},
+            { id: 'isha', name: 'Isha', strat: {
+                negative: "Falling asleep before praying because you laid in bed 'just to rest for a minute'.",
+                positive: "Make Wudu immediately after taking off your shoes when you get home at night.",
+                hack: "Never lay down on your bed until Isha is done. The bed is lava until you pray."
+            }},
+            { id: 'quran', name: 'Quran (1 Page)', strat: {
+                negative: "Telling yourself 'I don't have time to read a whole chapter today', so you read nothing.",
+                positive: "Leave your physical Quran open on your desk, or put the app on your phone's home dock.",
+                hack: "The 1-Ayah Rule. Tell yourself you only have to read ONE sentence. Usually, you'll end up reading the whole page."
+            }}
+        ];
+
+        const HABITS = [
+            { id: 'study', name: 'Deep Study', strat: {
+                negative: "The 'No Plan' or 'Overwhelm' Trigger. Sitting at your desk with no clear goal, causing your brain to seek cheap dopamine instead.",
+                positive: "Prime the environment. Leave your desk clean with the exact book or program open to where you need to start.",
+                hack: "The 2-Minute Rule. Tell yourself 'I will only study for 2 minutes.' Once the friction of starting is gone, you'll keep going."
+            }},
+            { id: 'gym', name: 'Gym / Workout', strat: {
+                negative: "The 'Couch' Trigger. Coming home and sitting down 'just for 5 minutes'. Your brain registers the day as over. Game over.",
+                positive: "Have your gym clothes laid out on your bed, and your pre-workout/water bottle ready.",
+                hack: "Momentum. Do not sit down when you get home. Change into your gym clothes instantly. The friction to stay home while wearing gym clothes is higher than just going."
+            }},
+            { id: 'diet', name: 'Clean Diet', strat: {
+                negative: "Visual Triggers. Having junk food or chips visible on your counter or in your room. If you see it, you crave it.",
+                positive: "Have healthy meals prepped, and keep a large bottle of water next to you at all times to curb false hunger.",
+                hack: "The 11 PM cutoff. Brush your teeth early in the evening. The mint flavor and the laziness of not wanting to brush again stops late-night snacking."
+            }}
+        ];
+
+        const TRAPS = [
+            { id: 'trap_snooze', name: 'Dodged: Snooze Alarm', strat: { negative: "Hitting snooze destroys morning momentum.", positive: "Put phone across the room.", hack: "Feet on the floor immediately." } },
+            { id: 'trap_bed', name: 'Dodged: Bed Before Isha', strat: { negative: "Laying down = sleeping without praying.", positive: "Do Wudu right when getting home.", hack: "Bed is lava until Isha is done." } },
+            { id: 'trap_couch', name: 'Dodged: The Couch Trap', strat: { negative: "Sitting kills workout motivation.", positive: "Gym clothes laid out.", hack: "Change clothes instantly upon arriving home." } },
+            { id: 'trap_scroll', name: 'Dodged: Doomscrolling', strat: { negative: "Seeking dopamine to escape stress.", positive: "Phone in another room.", hack: "2-Minute Rule to start studying." } },
+            { id: 'trap_junk', name: 'Dodged: Junk Food', strat: { negative: "Eating because you saw it.", positive: "Hide it or don't buy it.", hack: "Brush teeth early at 9 PM." } },
+            { id: 'trap_distraction', name: 'Dodged: Mindless Browsing', strat: { negative: "Opening YouTube/TikTok instead of studying.", positive: "Put phone in another room.", hack: "Use the 2-Minute Rule." } }
+        ];
+
+        // --- SKINS ---
+        const SKINS = [
+            { id: 's1', emoji: '👤', name: 'Default', requirement: null },
+            { id: 's2', emoji: '🛡️', name: 'Squire', requirement: 'b1' },
+            { id: 's3', emoji: '⚔️', name: 'Warrior', requirement: 'b13' },
+            { id: 's4', emoji: '🏹', name: 'Ranger', requirement: 'b6' },
+            { id: 's5', emoji: '🥷', name: 'Ninja', requirement: 'b2' },
+            { id: 's6', emoji: '🧙‍♂️', name: 'Mage', requirement: 'lvl_15' },
+            { id: 's7', emoji: '🦉', name: 'Sage', requirement: 'lvl_30' }, 
+            { id: 's8', emoji: '🌿', name: 'Druid', requirement: 'b24' },
+            { id: 's9', emoji: '🪓', name: 'Berserker', requirement: 'b26' },
+            { id: 's10', emoji: '🩸', name: 'Vampire', requirement: 'lvl_50' },
+            { id: 's11', emoji: '🐺', name: 'Lycan', requirement: 'b3' },
+            { id: 's12', emoji: '🐉', name: 'Dragonborn', requirement: 'b4' },
+            { id: 's13', emoji: '⚔️', name: 'Paladin', requirement: 'b14' },
+            { id: 's14', emoji: '🤖', name: 'Mecha', requirement: 'lvl_60' },
+            { id: 's15', emoji: '💎', name: 'Crystal Golem', requirement: 'lvl_75' },
+            { id: 's16', emoji: '⚡', name: 'Stormcaller', requirement: 'b15' },
+            { id: 's17', emoji: '🌌', name: 'Voidwalker', requirement: 'lvl_100' },
+            { id: 's18', emoji: '👼', name: 'Celestial', requirement: 'b5' },
+            { id: 's19', emoji: '👑', name: 'Sovereign', requirement: 'lvl_120' },
+            { id: 's20', emoji: '✨', name: 'Immortal', requirement: 'lvl_80' },
+            
+            // --- NEW: Trap Dodger Skins ---
+            { id: 's21', emoji: '🌘', name: 'Shadow', requirement: 't4' },
+            { id: 's22', emoji: '🗡️', name: 'Assassin', requirement: 'ts3' },
+            { id: 's23', emoji: '👻', name: 'Phantom', requirement: 't8' },
+            { id: 's24', emoji: '🧘', name: 'Zen Master', requirement: 'tp5' },
+            { id: 's25', emoji: '🕶️', name: 'The One', requirement: 't9' }
+        ];
+
+        // --- ACHIEVEMENTS (75 Total) ---
+        const BADGES = [
+            // Task Totals
+            { id: 'b1', name: 'First Step', desc: 'Complete 10 total tasks', target: 10, type: 'tasks' },
+            { id: 'b12', name: 'Getting Warmed Up', desc: 'Complete 50 total tasks', target: 50, type: 'tasks' },
+            { id: 'b2', name: 'Century Club', desc: 'Complete 100 total tasks', target: 100, type: 'tasks' },
+            { id: 'b13', name: 'Relentless', desc: 'Complete 250 total tasks', target: 250, type: 'tasks' },
+            { id: 'b3', name: 'Halfway There', desc: 'Complete 500 total tasks', target: 500, type: 'tasks' },
+            { id: 'b14', name: 'Iron Will', desc: 'Complete 750 total tasks', target: 750, type: 'tasks' },
+            { id: 'b4', name: 'Unstoppable', desc: 'Complete 1000 total tasks', target: 1000, type: 'tasks' },
+            { id: 'b15', name: 'Master of Routine', desc: 'Complete 1080 total tasks (Max)', target: 1080, type: 'tasks' },
+            
+            // Perfect Days (All tasks done in a day)
+            { id: 'b6', name: 'Flawless Victory', desc: 'Achieve 1 Perfect Day', target: 1, type: 'perfect' },
+            { id: 'b16', name: 'Three-Peat', desc: 'Achieve 3 Perfect Days', target: 3, type: 'perfect' },
+            { id: 'b7', name: 'Solid Week', desc: 'Achieve 7 Perfect Days', target: 7, type: 'perfect' },
+            { id: 'b17', name: 'Two Weeks Strong', desc: 'Achieve 14 Perfect Days', target: 14, type: 'perfect' },
+            { id: 'b8', name: 'A Month of Focus', desc: 'Achieve 30 Perfect Days', target: 30, type: 'perfect' },
+            { id: 'b18', name: 'Sixty Days Perfect', desc: 'Achieve 60 Perfect Days', target: 60, type: 'perfect' },
+            { id: 'b9', name: 'Absolute Perfection', desc: 'Achieve 90 Perfect Days', target: 90, type: 'perfect' },
+            
+            // Flawless Streaks (Consecutive perfect days)
+            { id: 'b19', name: 'Heating Up', desc: '3-Day Flawless Streak', target: 3, type: 'flawlessStreak' },
+            { id: 'b20', name: 'On Fire', desc: '7-Day Flawless Streak', target: 7, type: 'flawlessStreak' },
+            { id: 'b21', name: 'Blazing', desc: '14-Day Flawless Streak', target: 14, type: 'flawlessStreak' },
+            { id: 'b5', name: 'Inferno', desc: '30-Day Flawless Streak', target: 30, type: 'flawlessStreak' },
+
+            // 25 Level Achievements (XP ONLY)
+            { id: 'lvl_2', name: 'Awakened', desc: 'Reach Account Level 2', target: 2, type: 'level' },
+            { id: 'lvl_3', name: 'Novice', desc: 'Reach Account Level 3', target: 3, type: 'level' },
+            { id: 'lvl_4', name: 'Apprentice', desc: 'Reach Account Level 4', target: 4, type: 'level' },
+            { id: 'lvl_5', name: 'Journey Begins', desc: 'Reach Account Level 5', target: 5, type: 'level' },
+            { id: 'lvl_10', name: 'Adept (Silver Rank)', desc: 'Reach Account Level 10', target: 10, type: 'level' },
+            { id: 'lvl_15', name: 'Seasoned', desc: 'Reach Account Level 15', target: 15, type: 'level' },
+            { id: 'lvl_20', name: 'Veteran', desc: 'Reach Account Level 20', target: 20, type: 'level' },
+            { id: 'lvl_25', name: 'Expert (Gold Rank)', desc: 'Reach Account Level 25', target: 25, type: 'level' },
+            { id: 'lvl_30', name: 'Elite', desc: 'Reach Account Level 30', target: 30, type: 'level' },
+            { id: 'lvl_35', name: 'Masterful', desc: 'Reach Account Level 35', target: 35, type: 'level' },
+            { id: 'lvl_40', name: 'Champion (Platinum Rank)', desc: 'Reach Account Level 40', target: 40, type: 'level' },
+            { id: 'lvl_45', name: 'Hero', desc: 'Reach Account Level 45', target: 45, type: 'level' },
+            { id: 'lvl_50', name: 'Warlord', desc: 'Reach Account Level 50', target: 50, type: 'level' },
+            { id: 'lvl_55', name: 'Mythic', desc: 'Reach Account Level 55', target: 55, type: 'level' },
+            { id: 'lvl_60', name: 'Ascendant (Diamond Rank)', desc: 'Reach Account Level 60', target: 60, type: 'level' },
+            { id: 'lvl_65', name: 'Demigod', desc: 'Reach Account Level 65', target: 65, type: 'level' },
+            { id: 'lvl_70', name: 'Godlike', desc: 'Reach Account Level 70', target: 70, type: 'level' },
+            { id: 'lvl_75', name: 'Titan', desc: 'Reach Account Level 75', target: 75, type: 'level' },
+            { id: 'lvl_80', name: 'Immortal (Master Rank)', desc: 'Reach Account Level 80', target: 80, type: 'level' },
+            { id: 'lvl_85', name: 'Cosmic', desc: 'Reach Account Level 85', target: 85, type: 'level' },
+            { id: 'lvl_90', name: 'Universal', desc: 'Reach Account Level 90', target: 90, type: 'level' },
+            { id: 'lvl_95', name: 'Galactic', desc: 'Reach Account Level 95', target: 95, type: 'level' },
+            { id: 'lvl_100', name: 'Omniscient (Grandmaster)', desc: 'Reach Account Level 100', target: 100, type: 'level' },
+            { id: 'lvl_110', name: 'Transcendent', desc: 'Reach Account Level 110', target: 110, type: 'level' },
+            { id: 'lvl_120', name: 'The Oracle (Legend Rank)', desc: 'Reach Account Level 120', target: 120, type: 'level' },
+
+            // Specific Task Streaks (Study)
+            { id: 'b33', name: 'Student', desc: '7-Day Study Streak', target: 7, type: 'specificStreak', item: 'study' },
+            { id: 'b34', name: 'Scholar', desc: '30-Day Study Streak', target: 30, type: 'specificStreak', item: 'study' },
+            { id: 'b24', name: 'Archmage of Knowledge', desc: '90-Day Study Streak', target: 90, type: 'specificStreak', item: 'study' },
+
+            // Specific Task Streaks (Diet)
+            { id: 'b35', name: 'Clean Eater', desc: '7-Day Diet Streak', target: 7, type: 'specificStreak', item: 'diet' },
+            { id: 'b36', name: 'Nutritionist', desc: '30-Day Diet Streak', target: 30, type: 'specificStreak', item: 'diet' },
+            { id: 'b25', name: 'Temple Body', desc: '90-Day Diet Streak', target: 90, type: 'specificStreak', item: 'diet' },
+
+            // Specific Task Streaks (Gym)
+            { id: 'b37', name: 'Lifter', desc: '7-Day Gym Streak', target: 7, type: 'specificStreak', item: 'gym' },
+            { id: 'b38', name: 'Athlete', desc: '30-Day Gym Streak', target: 30, type: 'specificStreak', item: 'gym' },
+            { id: 'b26', name: 'Olympian', desc: '90-Day Gym Streak', target: 90, type: 'specificStreak', item: 'gym' },
+
+            // Generate remaining generic single-item streaks to reach 75 total
+            ...Array.from({length: 22}, (_, i) => ({
+                id: `bg_${i}`, 
+                name: `Streak Master ${i+1}`, 
+                desc: `Hit a ${14 + i}-day streak on ANY habit/prayer`, 
+                target: 14 + i, 
+                type: 'anyStreak'
+            })),
+
+            // --- 25 NEW TRAP (FRICTION) ACHIEVEMENTS ---
+            { id: 't1', name: 'Awareness', desc: 'Dodge 1 Trap', target: 1, type: 'traps' },
+            { id: 't2', name: 'Mindful', desc: 'Dodge 10 Traps', target: 10, type: 'traps' },
+            { id: 't3', name: 'Guarded', desc: 'Dodge 25 Traps', target: 25, type: 'traps' },
+            { id: 't4', name: 'Untouchable', desc: 'Dodge 50 Traps', target: 50, type: 'traps' },
+            { id: 't5', name: 'Slippery', desc: 'Dodge 100 Traps', target: 100, type: 'traps' },
+            { id: 't6', name: 'Evasive', desc: 'Dodge 150 Traps', target: 150, type: 'traps' },
+            { id: 't7', name: 'Ghost', desc: 'Dodge 200 Traps', target: 200, type: 'traps' },
+            { id: 't8', name: 'Frictionless', desc: 'Dodge 250 Traps', target: 250, type: 'traps' },
+            { id: 't9', name: 'Neo', desc: 'Dodge 300 Traps', target: 300, type: 'traps' },
+            { id: 't10', name: 'Master of Self', desc: 'Dodge 400 Traps', target: 400, type: 'traps' },
+            { id: 't11', name: 'Ascended Mind', desc: 'Dodge 500 Traps', target: 500, type: 'traps' },
+
+            { id: 'tp1', name: 'Clean Slate', desc: '1 Perfect Trap Day (Dodged All)', target: 1, type: 'perfectTraps' },
+            { id: 'tp2', name: 'Clear Mind', desc: '3 Perfect Trap Days', target: 3, type: 'perfectTraps' },
+            { id: 'tp3', name: 'Laser Focus', desc: '7 Perfect Trap Days', target: 7, type: 'perfectTraps' },
+            { id: 'tp4', name: 'Unbreakable', desc: '14 Perfect Trap Days', target: 14, type: 'perfectTraps' },
+            { id: 'tp5', name: 'Iron Will', desc: '30 Perfect Trap Days', target: 30, type: 'perfectTraps' },
+            { id: 'tp6', name: 'Diamond Mind', desc: '60 Perfect Trap Days', target: 60, type: 'perfectTraps' },
+            { id: 'tp7', name: 'Zen State', desc: '90 Perfect Trap Days', target: 90, type: 'perfectTraps' },
+
+            { id: 'ts1', name: 'Dodger', desc: '3-Day Trap Flawless Streak', target: 3, type: 'trapFlawlessStreak' },
+            { id: 'ts2', name: 'Ninja Moves', desc: '7-Day Trap Flawless Streak', target: 7, type: 'trapFlawlessStreak' },
+            { id: 'ts3', name: 'Shadow', desc: '14-Day Trap Flawless Streak', target: 14, type: 'trapFlawlessStreak' },
+            { id: 'ts4', name: 'Untraceable', desc: '21-Day Trap Flawless Streak', target: 21, type: 'trapFlawlessStreak' },
+            { id: 'ts5', name: 'Phantom', desc: '30-Day Trap Flawless Streak', target: 30, type: 'trapFlawlessStreak' },
+            { id: 'ts6', name: 'Illusion', desc: '60-Day Trap Flawless Streak', target: 60, type: 'trapFlawlessStreak' },
+            { id: 'ts7', name: 'Formless', desc: '90-Day Trap Flawless Streak', target: 90, type: 'trapFlawlessStreak' }
+        ];
+
+        // --- RANKS ---
+        const RANKS = [
+            { name: 'Bronze', level: 1, class: 'rank-bronze' },
+            { name: 'Silver', level: 10, class: 'rank-silver' },
+            { name: 'Gold', level: 25, class: 'rank-gold' },
+            { name: 'Platinum', level: 40, class: 'rank-platinum' },
+            { name: 'Diamond', level: 60, class: 'rank-diamond' },
+            { name: 'Master', level: 80, class: 'rank-master' },
+            { name: 'Grandmaster', level: 100, class: 'rank-grandmaster' },
+            { name: 'Legend', level: 120, class: 'rank-legend' }
+        ];
+
+        // --- STATE ---
+        let currentDay = 1;
+        let data = JSON.parse(localStorage.getItem('mastery90Data')) || {};
+        let unlockedBadges = JSON.parse(localStorage.getItem('mastery90Badges')) || [];
+        let equippedSkin = localStorage.getItem('mastery90Skin') || 's1';
+        let metrics = { xp: 0, level: 1, flawless: 0, bestFlawless: 0, tasksDone: 0, perfectDays: 0, missedTasks: 0, trapsDodged: 0, perfectTrapDays: 0, bestTrapFlawless: 0 };
+
+        // --- INIT ---
+        function init() {
+            calculateMetrics();
+            renderCheckboxes();
+            updateUI();
+        }
+
+        // --- STREAMING_CHUNK:Core Logic & Calculations... ---
+        function calculateMetrics() {
+            let xp = 0;
+            let tasksDone = 0;
+            let perfectDays = 0;
+            let missedTasks = 0;
+            let currentFlawless = 0;
+            let bestFlawless = 0;
+
+            let trapsDodged = 0;
+            let perfectTrapDays = 0;
+            let currentTrapFlawless = 0;
+            let bestTrapFlawless = 0;
+
+            const allItems = [...PRAYERS, ...HABITS];
+
+            for (let d = 1; d <= currentDay; d++) {
+                let dayDone = 0;
+                let dayTotal = allItems.length;
+
+                allItems.forEach(item => {
+                    if (data[d] && data[d][item.id]) {
+                        dayDone++;
+                        tasksDone++;
+                        xp += 10;
+                    } else if (d < currentDay) {
+                        missedTasks++;
+                    }
+                });
+
+                if (dayDone === dayTotal) {
+                    perfectDays++;
+                    currentFlawless++;
+                    xp += 100; // Perfect day XP bonus
+                    if (currentFlawless > bestFlawless) bestFlawless = currentFlawless;
+                } else if (d < currentDay) {
+                    currentFlawless = 0; 
+                }
+
+                // Traps Logic
+                let dayTrapsDone = 0;
+                let dayTrapsTotal = TRAPS.length;
+
+                TRAPS.forEach(trap => {
+                    if (data[d] && data[d][trap.id]) {
+                        dayTrapsDone++;
+                        trapsDodged++;
+                        xp += 10; // Extra XP for dodging traps
+                    }
+                });
+
+                if (dayTrapsDone === dayTrapsTotal) {
+                    perfectTrapDays++;
+                    currentTrapFlawless++;
+                    xp += 50; // Perfect trap day XP bonus
+                    if (currentTrapFlawless > bestTrapFlawless) bestTrapFlawless = currentTrapFlawless;
+                } else if (d < currentDay) {
+                    currentTrapFlawless = 0;
+                }
+            }
+
+            // Calculate Level (Scaling curve)
+            let level = 1;
+            let xpNeeded = 100;
+            let tempXp = xp;
+            while (tempXp >= xpNeeded) {
+                level++;
+                tempXp -= xpNeeded;
+                xpNeeded = Math.floor(xpNeeded * 1.15); // Each level takes 15% more XP
+            }
+
+            metrics = { xp, level, currentXp: tempXp, xpNeeded, flawless: currentFlawless, bestFlawless, tasksDone, perfectDays, missedTasks, trapsDodged, perfectTrapDays, bestTrapFlawless };
+            
+            checkAchievements();
+        }
+
+        function toggleTask(id, element) {
+            if (!data[currentDay]) data[currentDay] = {};
+            data[currentDay][id] = element.checked;
+            
+            if(element.checked) {
+                element.classList.add('pop-animation');
+                setTimeout(() => element.classList.remove('pop-animation'), 300);
+            }
+
+            saveData();
+            calculateMetrics();
+            updateUI();
+            renderCheckboxes();
+        }
+
+        function calculateSingleStreak(itemId) {
+            let current = 0;
+            let max = 0;
+            for (let d = 1; d <= currentDay; d++) {
+                if (data[d] && data[d][itemId]) {
+                    current++;
+                    if (current > max) max = current;
+                } else if (d < currentDay) {
+                    current = 0;
+                }
+            }
+            return { current, max };
+        }
+
+        function getHighestAnyStreak() {
+            let highest = 0;
+            [...PRAYERS, ...HABITS, ...TRAPS].forEach(item => {
+                const s = calculateSingleStreak(item.id).max;
+                if(s > highest) highest = s;
+            });
+            return highest;
+        }
+
+        // --- ACHIEVEMENTS & SKINS ---
+        function checkAchievements() {
+            let newUnlock = false;
+            let highestStreak = getHighestAnyStreak();
+
+            BADGES.forEach(badge => {
+                if (!unlockedBadges.includes(badge.id)) {
+                    let achieved = false;
+                    
+                    if (badge.type === 'tasks' && metrics.tasksDone >= badge.target) achieved = true;
+                    if (badge.type === 'perfect' && metrics.perfectDays >= badge.target) achieved = true;
+                    if (badge.type === 'flawlessStreak' && metrics.bestFlawless >= badge.target) achieved = true;
+                    if (badge.type === 'level' && metrics.level >= badge.target) achieved = true;
+                    if (badge.type === 'anyStreak' && highestStreak >= badge.target) achieved = true;
+                    if (badge.type === 'specificStreak') {
+                        const s = calculateSingleStreak(badge.item).max;
+                        if (s >= badge.target) achieved = true;
+                    }
+                    if (badge.type === 'traps' && metrics.trapsDodged >= badge.target) achieved = true;
+                    if (badge.type === 'perfectTraps' && metrics.perfectTrapDays >= badge.target) achieved = true;
+                    if (badge.type === 'trapFlawlessStreak' && metrics.bestTrapFlawless >= badge.target) achieved = true;
+
+                    if (achieved) {
+                        unlockedBadges.push(badge.id);
+                        newUnlock = badge;
+                    }
+                }
+            });
+
+            if (newUnlock) {
+                localStorage.setItem('mastery90Badges', JSON.stringify(unlockedBadges));
+                showToast(newUnlock.name, newUnlock.desc);
+            }
+        }
+
+        function equipSkin(id) {
+            const skin = SKINS.find(s => s.id === id);
+            if (!skin.requirement || unlockedBadges.includes(skin.requirement)) {
+                equippedSkin = id;
+                localStorage.setItem('mastery90Skin', id);
+                updateUI();
+                renderSkins();
+            }
+        }
+
+        // --- UI UPDATES ---
+        function getRank() {
+            let currentRank = RANKS[0];
+            for (let i = RANKS.length - 1; i >= 0; i--) {
+                if (metrics.level >= RANKS[i].level) {
+                    currentRank = RANKS[i];
+                    break;
+                }
+            }
+            return currentRank;
+        }
+
+        function updateUI() {
+            document.getElementById('current-day-display').innerText = `Day ${currentDay}`;
+            document.getElementById('flawless-streak').innerText = metrics.flawless;
+            
+            // Update Journey Progress Bar
+            const journeyPercent = Math.min(100, (currentDay / TOTAL_DAYS) * 100);
+            document.getElementById('journey-bar').style.width = `${journeyPercent}%`;
+            document.getElementById('journey-text').innerText = `Day ${currentDay} / ${TOTAL_DAYS}`;
+            
+            const rank = getRank();
+            const skin = SKINS.find(s => s.id === equippedSkin);
+
+            // Update Header
+            const playerRankEl = document.getElementById('player-rank');
+            playerRankEl.innerText = rank.name;
+            playerRankEl.className = `text-sm font-bold uppercase tracking-widest ${rank.class}`;
+            
+            const avatarEl = document.getElementById('player-avatar');
+            avatarEl.innerText = skin.emoji;
+            avatarEl.className = `text-2xl ${rank.class}`;
+
+            document.getElementById('player-level').innerText = metrics.level;
+
+            // Update Modal Stats
+            document.getElementById('modal-avatar').innerText = skin.emoji;
+            document.getElementById('modal-avatar').className = `text-7xl ${rank.class}`;
+            
+            const modalRankEl = document.getElementById('modal-rank');
+            document.getElementById('modal-rank').className = `text-3xl font-bold uppercase tracking-widest mb-1 ${rank.class}`;
+            
+            document.getElementById('modal-xp').innerText = `${metrics.xp.toLocaleString()} XP`;
+            document.getElementById('modal-level').innerText = metrics.level;
+            
+            document.getElementById('stat-tasks').innerText = metrics.tasksDone;
+            document.getElementById('stat-traps').innerText = metrics.trapsDodged;
+            document.getElementById('stat-perfect').innerText = metrics.perfectDays;
+            document.getElementById('stat-flawless').innerText = metrics.bestFlawless;
+            document.getElementById('stat-missed').innerText = metrics.missedTasks;
+
+            const xpPercent = (metrics.currentXp / metrics.xpNeeded) * 100;
+            document.getElementById('xp-bar').style.width = `${xpPercent}%`;
+            document.getElementById('xp-text').innerText = `${metrics.currentXp} / ${metrics.xpNeeded} XP`;
+            
+            document.getElementById('achievement-count').innerText = unlockedBadges.length;
+        }
+
+        function renderCheckboxes() {
+            const renderGroup = (items, containerId) => {
+                let html = '';
+                items.forEach(item => {
+                    const isChecked = data[currentDay] && data[currentDay][item.id] ? 'checked' : '';
+                    const streak = calculateSingleStreak(item.id);
+                    
+                    let progressColor = 'bg-slate-600';
+                    if (streak.max >= 7) progressColor = 'bg-blue-500';
+                    if (streak.max >= 21) progressColor = 'bg-purple-500';
+                    if (streak.max >= 90) progressColor = 'bg-yellow-500';
+
+                    const percent = Math.min(100, (streak.max / TOTAL_DAYS) * 100);
+
+                    html += `
+                        <div class="bg-slate-800/50 p-3 rounded-xl border border-slate-700/50 flex items-center justify-between">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-3">
+                                    <label class="flex items-center gap-3 cursor-pointer flex-1">
+                                        <input type="checkbox" class="checkbox-custom flex-shrink-0" 
+                                            onchange="toggleTask('${item.id}', this)" ${isChecked}>
+                                        <span class="font-medium text-slate-200 truncate">${item.name}</span>
+                                    </label>
+                                    <button onclick="openStrategyModal('${item.id}')" class="strategy-btn text-yellow-400 opacity-70 hover:opacity-100 p-1 flex-shrink-0" title="Quest Intel">
+                                        <i class="fas fa-lightbulb"></i>
+                                    </button>
+                                </div>
+                                <div class="mt-2 h-1.5 w-full bg-slate-700 rounded-full overflow-hidden">
+                                    <div class="h-full ${progressColor} transition-all" style="width: ${percent}%"></div>
+                                </div>
+                            </div>
+                            <div class="text-right ml-4 w-12 flex-shrink-0">
+                                <div class="text-xs text-slate-400">Streak</div>
+                                <div class="font-bold text-white">${streak.max} 🔥</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                document.getElementById(containerId).innerHTML = html;
+            };
+
+            renderGroup(PRAYERS, 'prayers-container');
+            renderGroup(HABITS, 'habits-container');
+            renderGroup(TRAPS, 'traps-container');
+        }
+
+        function renderSkins() {
+            let html = '';
+            const rankClass = getRank().class;
+
+            SKINS.forEach(skin => {
+                const isUnlocked = !skin.requirement || unlockedBadges.includes(skin.requirement);
+                const isEquipped = equippedSkin === skin.id;
+                
+                let stateClass = '';
+                if (!isUnlocked) stateClass = 'locked';
+                if (isEquipped) stateClass = 'equipped';
+
+                let reqText = "Default";
+                if(skin.requirement) {
+                    const b = BADGES.find(x => x.id === skin.requirement);
+                    reqText = b ? b.name : "Locked";
+                }
+
+                html += `
+                    <div onclick="equipSkin('${skin.id}')" class="skin-card ${stateClass} bg-slate-800 p-4 rounded-xl border border-slate-700 text-center flex flex-col items-center justify-center">
+                        <div class="text-4xl mb-2 ${isUnlocked ? rankClass : ''}">${skin.emoji}</div>
+                        <div class="text-sm font-bold text-white">${skin.name}</div>
+                        <div class="text-[10px] text-slate-400 mt-1">${isUnlocked ? 'Unlocked' : 'Requires: ' + reqText}</div>
+                    </div>
+                `;
+            });
+            document.getElementById('skins-container').innerHTML = html;
+        }
+
+        function renderBadges() {
+            let html = '';
+            BADGES.forEach(badge => {
+                const isUnlocked = unlockedBadges.includes(badge.id);
+                const opacity = isUnlocked ? 'opacity-100' : 'opacity-40 grayscale';
+                const bg = isUnlocked ? 'bg-gradient-to-br from-slate-800 to-blue-900/30' : 'bg-slate-800';
+                const border = isUnlocked ? 'border-blue-500/50' : 'border-slate-700';
+                const iconColor = isUnlocked ? 'text-yellow-400' : 'text-slate-500';
+
+                html += `
+                    <div class="${opacity} ${bg} border ${border} rounded-xl p-4 flex gap-4 items-center">
+                        <div class="${iconColor} text-3xl bg-slate-900 rounded-full w-12 h-12 flex items-center justify-center border border-slate-700 flex-shrink-0">
+                            <i class="fas ${isUnlocked ? 'fa-medal' : 'fa-lock'}"></i>
+                        </div>
+                        <div>
+                            <div class="font-bold text-white text-sm">${badge.name}</div>
+                            <div class="text-xs text-slate-400">${badge.desc}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            document.getElementById('badges-container').innerHTML = html;
+        }
+
+        // --- STREAMING_CHUNK:Modals and API interactions... ---
+        function changeDay(delta) {
+            let newDay = currentDay + delta;
+            if (newDay >= 1 && newDay <= TOTAL_DAYS) {
+                currentDay = newDay;
+                init();
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('mastery90Data', JSON.stringify(data));
+        }
+
+        function openRewardsModal() {
+            document.getElementById('rewards-modal').classList.remove('hidden');
+            renderSkins();
+            renderBadges();
+        }
+
+        function closeRewardsModal() {
+            document.getElementById('rewards-modal').classList.add('hidden');
+        }
+
+        function openStrategyModal(itemId) {
+            const item = [...PRAYERS, ...HABITS, ...TRAPS].find(x => x.id === itemId);
+            if (!item || !item.strat) return;
+            
+            document.getElementById('strat-title').innerText = item.name;
+            document.getElementById('strat-negative').innerText = item.strat.negative;
+            document.getElementById('strat-positive').innerText = item.strat.positive;
+            document.getElementById('strat-hack').innerText = item.strat.hack;
+            document.getElementById('strategy-modal').classList.remove('hidden');
+        }
+
+        function closeStrategyModal() {
+            document.getElementById('strategy-modal').classList.add('hidden');
+        }
+
+        function showToast(title, desc) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-title').innerText = title;
+            document.getElementById('toast-desc').innerText = desc;
+            
+            toast.classList.remove('hidden', 'translate-x-full');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-x-full');
+                setTimeout(() => toast.classList.add('hidden'), 300);
+            }, 4000);
+        }
+
+        function openAIModal() {
+            document.getElementById('ai-modal').classList.remove('hidden');
+            fetchAICoach();
+        }
+
+        function closeAIModal() {
+            document.getElementById('ai-modal').classList.add('hidden');
+        }
+
+        async function fetchAICoach() {
+            const modalText = document.getElementById('ai-response-text');
+            const loadingIcon = document.getElementById('ai-loading');
+            
+            modalText.classList.add('hidden');
+            loadingIcon.classList.remove('hidden');
+            
+            try {
+                const rank = getRank().name;
+                const total = metrics.tasksDone + metrics.missedTasks;
+                const percent = total > 0 ? Math.round((metrics.tasksDone / total) * 100) : 0;
+                
+                const prompt = `Act as an elite, highly motivating life coach and gaming mentor. 
+                I am currently doing a 90-day self-improvement challenge focusing on Deep Study, Gym, Diet, and Prayer.
+                My current rank is ${rank} (Level ${metrics.level}).
+                I have completed ${metrics.tasksDone} tasks and missed ${metrics.missedTasks} tasks (${percent}% completion rate).
+                I have also successfully dodged ${metrics.trapsDodged} negative traps/distractions!
+                My current flawless streak is ${metrics.flawless} days, and my best ever is ${metrics.bestFlawless} days.
+                
+                Provide a short, punchy (maximum 3 sentences) motivational message tailored to these exact stats. 
+                If my completion rate is low or I have missed a lot of tasks, give me strict tough love about friction and discipline. 
+                If my stats are high, hype me up and praise my discipline. 
+                Keep it in an epic gamer/RPG aesthetic tone (refer to quests, grinding, leveling up, defeating the "friction monster", etc.). Address me directly.`;
+                
+                const payload = {
+                    contents: [{ parts: [{ text: prompt }] }]
+                };
+                
+                const apiKey = ""; 
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await response.json();
+                
+                if (result.candidates && result.candidates.length > 0) {
+                    modalText.innerText = '"' + result.candidates[0].content.parts[0].text.trim() + '"';
+                } else {
+                    modalText.innerText = '"The Oracle is currently silent. Take a breath, focus on today, and try again later."';
+                }
+            } catch (error) {
+                console.error("AI API Error:", error);
+                modalText.innerText = '"Connection lost to the AI realm. Please check your network."';
+            }
+            
+            loadingIcon.classList.add('hidden');
+            modalText.classList.remove('hidden');
+        }
+
+        // Start App
+        init();
+    </script>
+</body>
+</html>
