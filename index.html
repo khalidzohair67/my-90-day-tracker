@@ -458,8 +458,6 @@
             { id: 's18', emoji: '👼', name: 'Celestial', requirement: 'b5' },
             { id: 's19', emoji: '👑', name: 'Sovereign', requirement: 'lvl_120' },
             { id: 's20', emoji: '✨', name: 'Immortal', requirement: 'lvl_80' },
-            
-            // --- NEW: Trap Dodger Skins ---
             { id: 's21', emoji: '🌘', name: 'Shadow', requirement: 't4' },
             { id: 's22', emoji: '🗡️', name: 'Assassin', requirement: 'ts3' },
             { id: 's23', emoji: '👻', name: 'Phantom', requirement: 't8' },
@@ -467,7 +465,7 @@
             { id: 's25', emoji: '🕶️', name: 'The One', requirement: 't9' }
         ];
 
-        // --- ACHIEVEMENTS (75 Total) ---
+        // --- ACHIEVEMENTS (100 Total) ---
         const BADGES = [
             // Task Totals
             { id: 'b1', name: 'First Step', desc: 'Complete 10 total tasks', target: 10, type: 'tasks' },
@@ -494,7 +492,7 @@
             { id: 'b21', name: 'Blazing', desc: '14-Day Flawless Streak', target: 14, type: 'flawlessStreak' },
             { id: 'b5', name: 'Inferno', desc: '30-Day Flawless Streak', target: 30, type: 'flawlessStreak' },
 
-            // 25 Level Achievements (XP ONLY)
+            // Level Achievements
             { id: 'lvl_2', name: 'Awakened', desc: 'Reach Account Level 2', target: 2, type: 'level' },
             { id: 'lvl_3', name: 'Novice', desc: 'Reach Account Level 3', target: 3, type: 'level' },
             { id: 'lvl_4', name: 'Apprentice', desc: 'Reach Account Level 4', target: 4, type: 'level' },
@@ -536,16 +534,7 @@
             { id: 'b38', name: 'Athlete', desc: '30-Day Gym Streak', target: 30, type: 'specificStreak', item: 'gym' },
             { id: 'b26', name: 'Olympian', desc: '90-Day Gym Streak', target: 90, type: 'specificStreak', item: 'gym' },
 
-            // Generate remaining generic single-item streaks to reach 75 total
-            ...Array.from({length: 22}, (_, i) => ({
-                id: `bg_${i}`, 
-                name: `Streak Master ${i+1}`, 
-                desc: `Hit a ${14 + i}-day streak on ANY habit/prayer`, 
-                target: 14 + i, 
-                type: 'anyStreak'
-            })),
-
-            // --- 25 NEW TRAP (FRICTION) ACHIEVEMENTS ---
+            // Traps Dodged
             { id: 't1', name: 'Awareness', desc: 'Dodge 1 Trap', target: 1, type: 'traps' },
             { id: 't2', name: 'Mindful', desc: 'Dodge 10 Traps', target: 10, type: 'traps' },
             { id: 't3', name: 'Guarded', desc: 'Dodge 25 Traps', target: 25, type: 'traps' },
@@ -572,7 +561,16 @@
             { id: 'ts4', name: 'Untraceable', desc: '21-Day Trap Flawless Streak', target: 21, type: 'trapFlawlessStreak' },
             { id: 'ts5', name: 'Phantom', desc: '30-Day Trap Flawless Streak', target: 30, type: 'trapFlawlessStreak' },
             { id: 'ts6', name: 'Illusion', desc: '60-Day Trap Flawless Streak', target: 60, type: 'trapFlawlessStreak' },
-            { id: 'ts7', name: 'Formless', desc: '90-Day Trap Flawless Streak', target: 90, type: 'trapFlawlessStreak' }
+            { id: 'ts7', name: 'Formless', desc: '90-Day Trap Flawless Streak', target: 90, type: 'trapFlawlessStreak' },
+            
+            // Generic Streaks to fill remaining
+            ...Array.from({length: 19}, (_, i) => ({
+                id: `bg_${i}`, 
+                name: `Streak Master ${i+1}`, 
+                desc: `Hit a ${14 + i}-day streak on ANY habit/prayer`, 
+                target: 14 + i, 
+                type: 'anyStreak'
+            }))
         ];
 
         // --- RANKS ---
@@ -601,7 +599,7 @@
             updateUI();
         }
 
-        // --- STREAMING_CHUNK:Core Logic & Calculations... ---
+        // --- CORE LOGIC ---
         function calculateMetrics() {
             let xp = 0;
             let tasksDone = 0;
@@ -807,231 +805,3 @@
             
             document.getElementById('stat-tasks').innerText = metrics.tasksDone;
             document.getElementById('stat-traps').innerText = metrics.trapsDodged;
-            document.getElementById('stat-perfect').innerText = metrics.perfectDays;
-            document.getElementById('stat-flawless').innerText = metrics.bestFlawless;
-            document.getElementById('stat-missed').innerText = metrics.missedTasks;
-
-            const xpPercent = (metrics.currentXp / metrics.xpNeeded) * 100;
-            document.getElementById('xp-bar').style.width = `${xpPercent}%`;
-            document.getElementById('xp-text').innerText = `${metrics.currentXp} / ${metrics.xpNeeded} XP`;
-            
-            document.getElementById('achievement-count').innerText = unlockedBadges.length;
-        }
-
-        function renderCheckboxes() {
-            const renderGroup = (items, containerId) => {
-                let html = '';
-                items.forEach(item => {
-                    const isChecked = data[currentDay] && data[currentDay][item.id] ? 'checked' : '';
-                    const streak = calculateSingleStreak(item.id);
-                    
-                    let progressColor = 'bg-slate-600';
-                    if (streak.max >= 7) progressColor = 'bg-blue-500';
-                    if (streak.max >= 21) progressColor = 'bg-purple-500';
-                    if (streak.max >= 90) progressColor = 'bg-yellow-500';
-
-                    const percent = Math.min(100, (streak.max / TOTAL_DAYS) * 100);
-
-                    html += `
-                        <div class="bg-slate-800/50 p-3 rounded-xl border border-slate-700/50 flex items-center justify-between">
-                            <div class="flex-1">
-                                <div class="flex items-center gap-3">
-                                    <label class="flex items-center gap-3 cursor-pointer flex-1">
-                                        <input type="checkbox" class="checkbox-custom flex-shrink-0" 
-                                            onchange="toggleTask('${item.id}', this)" ${isChecked}>
-                                        <span class="font-medium text-slate-200 truncate">${item.name}</span>
-                                    </label>
-                                    <button onclick="openStrategyModal('${item.id}')" class="strategy-btn text-yellow-400 opacity-70 hover:opacity-100 p-1 flex-shrink-0" title="Quest Intel">
-                                        <i class="fas fa-lightbulb"></i>
-                                    </button>
-                                </div>
-                                <div class="mt-2 h-1.5 w-full bg-slate-700 rounded-full overflow-hidden">
-                                    <div class="h-full ${progressColor} transition-all" style="width: ${percent}%"></div>
-                                </div>
-                            </div>
-                            <div class="text-right ml-4 w-12 flex-shrink-0">
-                                <div class="text-xs text-slate-400">Streak</div>
-                                <div class="font-bold text-white">${streak.max} 🔥</div>
-                            </div>
-                        </div>
-                    `;
-                });
-                document.getElementById(containerId).innerHTML = html;
-            };
-
-            renderGroup(PRAYERS, 'prayers-container');
-            renderGroup(HABITS, 'habits-container');
-            renderGroup(TRAPS, 'traps-container');
-        }
-
-        function renderSkins() {
-            let html = '';
-            const rankClass = getRank().class;
-
-            SKINS.forEach(skin => {
-                const isUnlocked = !skin.requirement || unlockedBadges.includes(skin.requirement);
-                const isEquipped = equippedSkin === skin.id;
-                
-                let stateClass = '';
-                if (!isUnlocked) stateClass = 'locked';
-                if (isEquipped) stateClass = 'equipped';
-
-                let reqText = "Default";
-                if(skin.requirement) {
-                    const b = BADGES.find(x => x.id === skin.requirement);
-                    reqText = b ? b.name : "Locked";
-                }
-
-                html += `
-                    <div onclick="equipSkin('${skin.id}')" class="skin-card ${stateClass} bg-slate-800 p-4 rounded-xl border border-slate-700 text-center flex flex-col items-center justify-center">
-                        <div class="text-4xl mb-2 ${isUnlocked ? rankClass : ''}">${skin.emoji}</div>
-                        <div class="text-sm font-bold text-white">${skin.name}</div>
-                        <div class="text-[10px] text-slate-400 mt-1">${isUnlocked ? 'Unlocked' : 'Requires: ' + reqText}</div>
-                    </div>
-                `;
-            });
-            document.getElementById('skins-container').innerHTML = html;
-        }
-
-        function renderBadges() {
-            let html = '';
-            BADGES.forEach(badge => {
-                const isUnlocked = unlockedBadges.includes(badge.id);
-                const opacity = isUnlocked ? 'opacity-100' : 'opacity-40 grayscale';
-                const bg = isUnlocked ? 'bg-gradient-to-br from-slate-800 to-blue-900/30' : 'bg-slate-800';
-                const border = isUnlocked ? 'border-blue-500/50' : 'border-slate-700';
-                const iconColor = isUnlocked ? 'text-yellow-400' : 'text-slate-500';
-
-                html += `
-                    <div class="${opacity} ${bg} border ${border} rounded-xl p-4 flex gap-4 items-center">
-                        <div class="${iconColor} text-3xl bg-slate-900 rounded-full w-12 h-12 flex items-center justify-center border border-slate-700 flex-shrink-0">
-                            <i class="fas ${isUnlocked ? 'fa-medal' : 'fa-lock'}"></i>
-                        </div>
-                        <div>
-                            <div class="font-bold text-white text-sm">${badge.name}</div>
-                            <div class="text-xs text-slate-400">${badge.desc}</div>
-                        </div>
-                    </div>
-                `;
-            });
-            document.getElementById('badges-container').innerHTML = html;
-        }
-
-        // --- STREAMING_CHUNK:Modals and API interactions... ---
-        function changeDay(delta) {
-            let newDay = currentDay + delta;
-            if (newDay >= 1 && newDay <= TOTAL_DAYS) {
-                currentDay = newDay;
-                init();
-            }
-        }
-
-        function saveData() {
-            localStorage.setItem('mastery90Data', JSON.stringify(data));
-        }
-
-        function openRewardsModal() {
-            document.getElementById('rewards-modal').classList.remove('hidden');
-            renderSkins();
-            renderBadges();
-        }
-
-        function closeRewardsModal() {
-            document.getElementById('rewards-modal').classList.add('hidden');
-        }
-
-        function openStrategyModal(itemId) {
-            const item = [...PRAYERS, ...HABITS, ...TRAPS].find(x => x.id === itemId);
-            if (!item || !item.strat) return;
-            
-            document.getElementById('strat-title').innerText = item.name;
-            document.getElementById('strat-negative').innerText = item.strat.negative;
-            document.getElementById('strat-positive').innerText = item.strat.positive;
-            document.getElementById('strat-hack').innerText = item.strat.hack;
-            document.getElementById('strategy-modal').classList.remove('hidden');
-        }
-
-        function closeStrategyModal() {
-            document.getElementById('strategy-modal').classList.add('hidden');
-        }
-
-        function showToast(title, desc) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toast-title').innerText = title;
-            document.getElementById('toast-desc').innerText = desc;
-            
-            toast.classList.remove('hidden', 'translate-x-full');
-            
-            setTimeout(() => {
-                toast.classList.add('translate-x-full');
-                setTimeout(() => toast.classList.add('hidden'), 300);
-            }, 4000);
-        }
-
-        function openAIModal() {
-            document.getElementById('ai-modal').classList.remove('hidden');
-            fetchAICoach();
-        }
-
-        function closeAIModal() {
-            document.getElementById('ai-modal').classList.add('hidden');
-        }
-
-        async function fetchAICoach() {
-            const modalText = document.getElementById('ai-response-text');
-            const loadingIcon = document.getElementById('ai-loading');
-            
-            modalText.classList.add('hidden');
-            loadingIcon.classList.remove('hidden');
-            
-            try {
-                const rank = getRank().name;
-                const total = metrics.tasksDone + metrics.missedTasks;
-                const percent = total > 0 ? Math.round((metrics.tasksDone / total) * 100) : 0;
-                
-                const prompt = `Act as an elite, highly motivating life coach and gaming mentor. 
-                I am currently doing a 90-day self-improvement challenge focusing on Deep Study, Gym, Diet, and Prayer.
-                My current rank is ${rank} (Level ${metrics.level}).
-                I have completed ${metrics.tasksDone} tasks and missed ${metrics.missedTasks} tasks (${percent}% completion rate).
-                I have also successfully dodged ${metrics.trapsDodged} negative traps/distractions!
-                My current flawless streak is ${metrics.flawless} days, and my best ever is ${metrics.bestFlawless} days.
-                
-                Provide a short, punchy (maximum 3 sentences) motivational message tailored to these exact stats. 
-                If my completion rate is low or I have missed a lot of tasks, give me strict tough love about friction and discipline. 
-                If my stats are high, hype me up and praise my discipline. 
-                Keep it in an epic gamer/RPG aesthetic tone (refer to quests, grinding, leveling up, defeating the "friction monster", etc.). Address me directly.`;
-                
-                const payload = {
-                    contents: [{ parts: [{ text: prompt }] }]
-                };
-                
-                const apiKey = ""; 
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
-
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                
-                const result = await response.json();
-                
-                if (result.candidates && result.candidates.length > 0) {
-                    modalText.innerText = '"' + result.candidates[0].content.parts[0].text.trim() + '"';
-                } else {
-                    modalText.innerText = '"The Oracle is currently silent. Take a breath, focus on today, and try again later."';
-                }
-            } catch (error) {
-                console.error("AI API Error:", error);
-                modalText.innerText = '"Connection lost to the AI realm. Please check your network."';
-            }
-            
-            loadingIcon.classList.add('hidden');
-            modalText.classList.remove('hidden');
-        }
-
-        // Start App
-        init();
-    </script>
-</body>
-</html>
